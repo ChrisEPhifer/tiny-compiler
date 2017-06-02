@@ -177,8 +177,8 @@ end;
 
 procedure Expression; Forward;
 
-procedure Factor;
-begin
+   procedure Factor;
+   begin
    if Look = '(' then begin
       Match('(');
       Expression;
@@ -188,7 +188,7 @@ begin
       Ident
    else
       EmitLn('MOVE #' + GetNum + ',D0');
-end;
+   end;
 
 {------------------------------------------------------------------------------}
 { Recognize and Translate a Multiply }

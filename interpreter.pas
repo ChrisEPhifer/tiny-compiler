@@ -141,21 +141,38 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Parse and Translate a Math Factor }
+
+function Expression : integer; Forward;
+
+   function Factor : integer;
+   begin
+      if Look = '(' then begin
+         Match('(');
+         Factor := Expression;
+         Match(')');
+      end
+      else
+         Factor := GetNum;
+   end;
+
+
+{--------------------------------------------------------------}
 { Parse and Translate a Math Term }
 
 function Term : integer;
 var Value : integer;
 begin
-   Value := GetNum;
+   Value := Factor;
    while Look in ['*', '/'] do begin
       case Look of
         '*' : begin
            Match('*');
-           Value := Value * GetNum;
+           Value := Value * Factor;
         end;
         '/' : begin
            Match('/');
-           Value := Value div GetNum;
+           Value := Value div Factor;
         end;
       end;
    end;
