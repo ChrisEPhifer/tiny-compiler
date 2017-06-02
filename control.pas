@@ -193,16 +193,58 @@ end;
 procedure Block; Forward;
 
    procedure DoIf;
-   var L : string;
+   var L1, L2 : string;
    begin
       Match('i');
-      L := NewLabel;
       Condition;
-      EmitLn('BEQ ' + L);
+      L1 := NewLabel;
+      L2 := L1;
+      EmitLn('BEQ ' + L1);
       Block;
+      if Look = 'l' then begin
+         Match('l');
+         L2 := NewLabel;
+         EmitLn('BRA ' + L2);
+         PostLabel(L1);
+         Block;
+      end;
       Match('e');
-      PostLabel(L);
+      PostLabel(L2);
    end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate a WHILE Statement }
+
+procedure DoWhile;
+var L1, L2 : string;
+begin
+   Match('w');
+   L1 := NewLabel;
+   L2 := NewLabel;
+   PostLabel(L1);
+   Condition;
+   EmitLn('BEQ ' + L2);
+   Block;
+   Match('e');
+   EmitLn('BRA ' + L1);
+   PostLabel(L2);
+end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate a LOOP Statement }
+
+procedure DoLoop;
+var L : string;
+begin
+   Match('p');
+   L := NewLabel;
+   PostLabel(L);
+   Block;
+   Match('e');
+   EmitLn('BRA ' + L);
+end;
 
 
 {--------------------------------------------------------------}
@@ -219,9 +261,11 @@ end;
 
 procedure Block;
 begin
-   while not(Look in ['e']) do begin
+   while not(Look in ['e', 'l']) do begin
       case Look of
         'i' : DoIf;
+        'w' : DoWhile;
+        'p' : DoLoop;
       else Other;
       end;
    end;
