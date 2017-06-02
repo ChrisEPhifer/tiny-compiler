@@ -188,6 +188,16 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Parse and Translate an Expression }
+{ This version is a dummy }
+
+procedure Expression;
+begin
+   EmitLn('<expr>');
+end;
+
+
+{--------------------------------------------------------------}
 { Recognize and Translate an IF Construct }
 
 procedure Block; Forward;
@@ -248,6 +258,73 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Parse and Translate a REPEAT Statement}
+
+procedure DoRepeat;
+var L : string;
+begin
+   Match('r');
+   L := NewLabel;
+   PostLabel(L);
+   Block;
+   Match('u');
+   Condition;
+   EmitLn('BEQ ' + L);
+end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate a FOR Statement }
+
+procedure DoFor;
+var L1, L2 : string;
+    Name   : string;
+begin
+   Match('f');
+   L1 := NewLabel;
+   L2 := NewLabel;
+   Name := GetName;
+   Match('=');
+   Expression;
+   EmitLn('SUBQ #1,D0');
+   EmitLn('LEA ' + Name + '(PC),A0');
+   EmitLn('MOVE D0,(A0)');
+   Expression;
+   EmitLn('MOVE D0,-(SP)');
+   PostLabel(L1);
+   EmitLn('LEA ' + Name + '(PC),A0');
+   EmitLn('MOVE (A0),D0');
+   EmitLn('ADDQ #1,D0');
+   EmitLn('MOVE D0,(A0)');
+   EmitLn('CMP (SP),D0');
+   EmitLn('BGT ' + L2);
+   Block;
+   Match('e');
+   EmitLn('BRA ' + L1);
+   PostLabel(L2);
+   EmitLn('ADDQ #2,SP');
+end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate a DO Statement }
+
+procedure DoDo;
+var L : string;
+begin
+   Match('d');
+   L := NewLabel;
+   Expression;
+   EmitLn('SUBQ #1,D0');
+   PostLabel(L);
+   EmitLn('MOVE D0,-(SP)');
+   Block;
+   EmitLn('MOVE (SP)+,D0');
+   EmitLn('DBRA D0,' + L);
+end;
+
+
+{--------------------------------------------------------------}
 { Recognize and Translate an "Other" }
 
 procedure Other;
@@ -261,11 +338,14 @@ end;
 
 procedure Block;
 begin
-   while not(Look in ['e', 'l']) do begin
+   while not(Look in ['e', 'l', 'u']) do begin
       case Look of
         'i' : DoIf;
         'w' : DoWhile;
         'p' : DoLoop;
+        'r' : DoRepeat;
+        'f' : DoFor;
+        'd' : DoDo;
       else Other;
       end;
    end;
