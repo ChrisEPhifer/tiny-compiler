@@ -5,11 +5,13 @@ program Interpreter;
 { Constant Declarations }
 
 const TAB = ^I;
+       CR = ^J;
 
 {--------------------------------------------------------------}
    { Variable Declarations }
 
-var Look: char;              { Lookahead Character }
+var Look : char;              { Lookahead Character }
+   Table :  Array['A'..'Z'] of integer;
 
 {--------------------------------------------------------------}
    { Read New Character From Input Stream }
@@ -54,6 +56,16 @@ procedure Match(x :  char);
 begin
       if Look = x then GetChar
       else Expected('''' + x + '''');
+end;
+
+
+{--------------------------------------------------------------}
+{ Recognize and Skip Over a Newline }
+
+procedure Newline;
+begin
+   if Look = CR then 
+      GetChar;
 end;
 
 
@@ -152,6 +164,8 @@ function Expression : integer; Forward;
          Factor := Expression;
          Match(')');
       end
+      else if IsAlpha(Look) then
+         Factor := Table[GetName]
       else
          Factor := GetNum;
    end;
@@ -205,11 +219,56 @@ begin
    Expression := Value;
 end;
 
+
+{--------------------------------------------------------------}
+{ Parse and Translate an Assignment Statement }
+
+procedure Assignment;
+var Name : char;
+begin
+   Name := GetName;
+   Match('=');
+   Table[Name] := Expression;
+end;
+
+
+{--------------------------------------------------------------}
+{ Input Routine }
+
+procedure Input;
+begin
+   Match('?');
+   Read(Table[GetName]);
+end;
+
+
+{--------------------------------------------------------------}
+{ Output Routine }
+
+procedure Output;
+begin
+   Match('!');
+   WriteLn(Table[GetName]);
+end;
+
+
+{--------------------------------------------------------------}
+{ Initialize the Variable Area }
+
+procedure InitTable;
+var i : char;
+begin
+   for i := 'A' to 'Z' do
+      Table[i] := 0;
+end;
+
+
 {--------------------------------------------------------------}
 { Initialize }
 
 procedure Init;
 begin
+   InitTable;
    GetChar;
 end;
 
@@ -219,6 +278,13 @@ end;
 
 begin
    Init;
-   Writeln(Expression);
+   repeat
+      case Look of
+        '?' : Input;
+        '!' : Output;
+        else Assignment;
+      end;
+      Newline;
+   until Look = '.';
 end.
 {--------------------------------------------------------------}
