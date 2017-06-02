@@ -109,10 +109,15 @@ end;
 { Get a Number }
 
 function GetNum : integer;
+var Value : integer;
 begin
+   Value := 0;
    if not IsDigit(Look) then Expected('Integer');
-   GetNum := Ord(Look) - Ord('0');
-   GetChar;
+   while IsDigit(Look) do begin
+      Value := 10 * Value + Ord(Look) - Ord('0');
+      GetChar;
+   end;
+   GetNum := Value;
 end;
 
 
@@ -139,7 +144,7 @@ end;
 { Parse and Translate a Math Term }
 
 function Term : integer;
-var Value :  integer;
+var Value : integer;
 begin
    Value := GetNum;
    while Look in ['*', '/'] do begin
