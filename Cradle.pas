@@ -95,6 +95,25 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Recognize White Space }
+
+function IsWhite(c : char) : boolean;
+begin
+   IsWhite := c in [' ', TAB];
+end;
+
+
+{--------------------------------------------------------------}
+{ Skip Over Leading White Space }
+
+procedure SkipWhite;
+begin
+      while IsWhite(Look) do
+         GetChar;
+end;
+
+
+{--------------------------------------------------------------}
 { Get an Identifier }
 
 function GetName: char;
