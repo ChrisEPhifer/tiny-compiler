@@ -8,12 +8,12 @@ const TAB = ^I;
        CR = ^J;
 
 {------------------------------------------------------------------------------}
-{ Variable Declarations }
+   { Variable Declarations }
 
 var Look : char; { Lookahead Character }
 
 {------------------------------------------------------------------------------}
-{ Read New Character From Input Stream }
+   { Read New Character From Input Stream }
 
 procedure GetChar;
 begin
@@ -167,9 +167,9 @@ begin
       Match('(');
       Match(')');
       EmitLn('BSR ' + Name);
-      end
-   else
-      EmitLn('MOVE ' + Name + '(PC),D0')
+   end
+else
+   EmitLn('MOVE ' + Name + '(PC),D0')
 end;
 
 {------------------------------------------------------------------------------}
@@ -179,10 +179,10 @@ procedure Expression; Forward;
 
    procedure Factor;
    begin
-   if Look = '(' then begin
-      Match('(');
-      Expression;
-      Match(')');
+      if Look = '(' then begin
+         Match('(');
+         Expression;
+         Match(')');
       end
    else if IsAlpha(Look) then
       Ident

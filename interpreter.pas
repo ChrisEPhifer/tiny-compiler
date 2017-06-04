@@ -10,8 +10,8 @@ const TAB = ^I;
 {--------------------------------------------------------------}
    { Variable Declarations }
 
-var Look : char;              { Lookahead Character }
-   Table :  Array['A'..'Z'] of integer;
+var Look : char;       { Lookahead Character }
+   Table : Array['A'..'Z'] of integer;
 
 {--------------------------------------------------------------}
    { Read New Character From Input Stream }
@@ -24,7 +24,7 @@ end;
 {--------------------------------------------------------------}
 { Report an Error }
 
-procedure Error(s :  string);
+procedure Error(s : string);
 begin
    WriteLn;
    WriteLn(^G, 'Error: ', s, '.');
@@ -34,7 +34,7 @@ end;
 {--------------------------------------------------------------}
 { Report Error and Halt }
 
-procedure Abort(s :  string);
+procedure Abort(s : string);
 begin
    Error(s);
    Halt;
@@ -44,7 +44,7 @@ end;
 {--------------------------------------------------------------}
 { Report What Was Expected }
 
-procedure Expected(s :  string);
+procedure Expected(s : string);
 begin
    Abort(s + ' Expected');
 end;
@@ -63,7 +63,7 @@ end;
 {--------------------------------------------------------------}
 { Recognize an Alpha Character }
 
-function IsAlpha(c :  char): boolean;
+function IsAlpha(c : char) : boolean;
 begin
    IsAlpha := upcase(c) in ['A'..'Z'];
 end;
@@ -73,7 +73,7 @@ end;
 
 { Recognize a Decimal Digit }
 
-function IsDigit(c :  char): boolean;
+function IsDigit(c : char) : boolean;
 begin
    IsDigit := c in ['0'..'9'];
 end;
@@ -82,7 +82,7 @@ end;
 {--------------------------------------------------------------}
 { Recognize an Alphanumeric }
 
-function IsAlNum(c :  char): boolean;
+function IsAlNum(c : char) : boolean;
 begin
    IsAlNum := IsAlpha(c) or IsDigit(c);
 end;
@@ -91,7 +91,7 @@ end;
 {--------------------------------------------------------------}
 { Recognize an Addop }
 
-function IsAddop(c :  char): boolean;
+function IsAddop(c : char) : boolean;
 begin
    IsAddop := c in ['+', '-'];
 end;
@@ -119,7 +119,7 @@ end;
 {--------------------------------------------------------------}
 { Match a Specific Input Character }
 
-procedure Match(x :  char);
+procedure Match(x : char);
 begin
    if Look <> x then Expected('''' + x + '''')
    else begin
@@ -161,7 +161,7 @@ end;
 {--------------------------------------------------------------}
 { Output a String with Tab }
 
-procedure Emit(s :  string);
+procedure Emit(s : string);
 begin
    Write(TAB, s);
 end;
@@ -170,7 +170,7 @@ end;
 {--------------------------------------------------------------}
 { Output a String with Tab and CRLF }
 
-procedure EmitLn(s :  string);
+procedure EmitLn(s : string);
 begin
    Emit(s);
    WriteLn;
@@ -189,10 +189,10 @@ function Expression : integer; Forward;
          Factor := Expression;
          Match(')');
       end
-      else if IsAlpha(Look) then
-         Factor := Table[GetName]
-      else
-         Factor := GetNum;
+   else if IsAlpha(Look) then
+      Factor := Table[GetName]
+   else
+      Factor := GetNum;
    end;
 
 
@@ -223,7 +223,7 @@ end;
 { Parse and Translate an Expression }
 
 function Expression : integer;
-var Value :  integer;
+var Value : integer;
 begin
    if IsAddop(Look) then
       Value := 0
@@ -307,7 +307,7 @@ begin
       case Look of
         '?' : Input;
         '!' : Output;
-        else Assignment;
+      else Assignment;
       end;
       Newline;
    until Look = '.';
