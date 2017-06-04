@@ -1,5 +1,5 @@
 {--------------------------------------------------------------}
-program interpreter;
+program boolean;
 
 {--------------------------------------------------------------}
 { Constant Declarations }
@@ -10,8 +10,7 @@ const TAB = ^I;
 {--------------------------------------------------------------}
    { Variable Declarations }
 
-var Look : char;              { Lookahead Character }
-   Table :  Array['A'..'Z'] of integer;
+var Look: char;              { Lookahead Character }
 
 {--------------------------------------------------------------}
    { Read New Character From Input Stream }
@@ -49,14 +48,13 @@ begin
    Abort(s + ' Expected');
 end;
 
-
 {--------------------------------------------------------------}
-{ Recognize and Skip Over a Newline }
+{ Match a Specific Input Character }
 
-procedure Newline;
+procedure Match(x :  char);
 begin
-   if Look = CR then 
-      GetChar;
+      if Look = x then GetChar
+      else Expected('''' + x + '''');
 end;
 
 
@@ -111,21 +109,8 @@ end;
 
 procedure SkipWhite;
 begin
-   while IsWhite(Look) do
-      GetChar;
-end;
-
-
-{--------------------------------------------------------------}
-{ Match a Specific Input Character }
-
-procedure Match(x :  char);
-begin
-   if Look <> x then Expected('''' + x + '''')
-   else begin
-      GetChar;
-      SkipWhite;
-   end;
+      while IsWhite(Look) do
+         GetChar;
 end;
 
 
@@ -137,24 +122,17 @@ begin
    if not IsAlpha(Look) then Expected('Name');
    GetName := UpCase(Look);
    GetChar;
-   SkipWhite;
 end;
 
 
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum : integer;
-var Value : integer;
+function GetNum: char;
 begin
-   Value := 0;
    if not IsDigit(Look) then Expected('Integer');
-   while IsDigit(Look) do begin
-      Value := 10 * Value + Ord(Look) - Ord('0');
-      GetChar;
-   end;
-   GetNum := Value;
-   SkipWhite;
+   GetNum := Look;
+   GetChar;
 end;
 
 
@@ -178,122 +156,10 @@ end;
 
 
 {--------------------------------------------------------------}
-{ Parse and Translate a Math Factor }
-
-function Expression : integer; Forward;
-
-   function Factor : integer;
-   begin
-      if Look = '(' then begin
-         Match('(');
-         Factor := Expression;
-         Match(')');
-      end
-      else if IsAlpha(Look) then
-         Factor := Table[GetName]
-      else
-         Factor := GetNum;
-   end;
-
-
-{--------------------------------------------------------------}
-{ Parse and Translate a Math Term }
-
-function Term : integer;
-var Value : integer;
-begin
-   Value := Factor;
-   while Look in ['*', '/'] do begin
-      case Look of
-        '*' : begin
-           Match('*');
-           Value := Value * Factor;
-        end;
-        '/' : begin
-           Match('/');
-           Value := Value div Factor;
-        end;
-      end;
-   end;
-   Term := Value;
-end;
-
-
-{--------------------------------------------------------------}
-{ Parse and Translate an Expression }
-
-function Expression : integer;
-var Value :  integer;
-begin
-   if IsAddop(Look) then
-      Value := 0
-   else
-      Value := Term;
-   while IsAddop(Look) do begin
-      case Look of
-        '+' : begin
-           Match('+');
-           Value := Value + Term;
-        end;
-        '-' : begin
-           Match('-');
-           Value := Value - Term;
-        end;
-      end;
-   end;
-   Expression := Value;
-end;
-
-
-{--------------------------------------------------------------}
-{ Parse and Translate an Assignment Statement }
-
-procedure Assignment;
-var Name : char;
-begin
-   Name := GetName;
-   Match('=');
-   Table[Name] := Expression;
-end;
-
-
-{--------------------------------------------------------------}
-{ Input Routine }
-
-procedure Input;
-begin
-   Match('?');
-   Read(Table[GetName]);
-end;
-
-
-{--------------------------------------------------------------}
-{ Output Routine }
-
-procedure Output;
-begin
-   Match('!');
-   WriteLn(Table[GetName]);
-end;
-
-
-{--------------------------------------------------------------}
-{ Initialize the Variable Area }
-
-procedure InitTable;
-var i : char;
-begin
-   for i := 'A' to 'Z' do
-      Table[i] := 0;
-end;
-
-
-{--------------------------------------------------------------}
 { Initialize }
 
 procedure Init;
 begin
-   InitTable;
    GetChar;
 end;
 
@@ -303,13 +169,5 @@ end;
 
 begin
    Init;
-   repeat
-      case Look of
-        '?' : Input;
-        '!' : Output;
-        else Assignment;
-      end;
-      Newline;
-   until Look = '.';
 end.
 {--------------------------------------------------------------}
