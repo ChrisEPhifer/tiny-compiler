@@ -132,7 +132,7 @@ end;
 {--------------------------------------------------------------}
 { Get an Identifier }
 
-function GetName: char;
+function GetName : char;
 begin
    if not IsAlpha(Look) then Expected('Name');
    GetName := UpCase(Look);

@@ -117,7 +117,7 @@ end;
 {--------------------------------------------------------------}
 { Get an Identifier }
 
-function GetName: char;
+function GetName : char;
 begin
    if not IsAlpha(Look) then Expected('Name');
    GetName := UpCase(Look);
@@ -128,7 +128,7 @@ end;
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum: char;
+function GetNum : char;
 begin
    if not IsDigit(Look) then Expected('Integer');
    GetNum := Look;
