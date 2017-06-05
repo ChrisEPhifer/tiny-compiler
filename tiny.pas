@@ -228,15 +228,60 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Parse and Translate a Main Program }
+
+procedure Main;
+begin
+   Match('b');
+   Prolog;
+   Match('e');
+   Epilog;
+end;
+
+
+{--------------------------------------------------------------}
+{ Allocate Storage for a Variable }
+
+procedure Alloc(N : char);
+begin
+   WriteLn(N, ':', TAB, 'DC 0');
+end;
+
+
+{--------------------------------------------------------------}
+{ Process a Data Declaration }
+
+procedure Decl;
+var Name : char;
+begin
+   Match('v');
+   Alloc(GetName);
+end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate Global Declarations }
+
+procedure TopDecls;
+begin
+   while Look <> 'b' do
+      case Look of
+        'v' : Decl;
+      else Abort('Unrecognized Keyword ''' + Look + '''');
+      end;
+end;
+
+
+{--------------------------------------------------------------}
 { Parse and Translate a Program }
 
 procedure Prog;
 begin
    Match('p');
    Header;
-   Prolog;
+   TopDecls;
+   Main;
    Match('.');
-   Epilog;
 end;
 
 
