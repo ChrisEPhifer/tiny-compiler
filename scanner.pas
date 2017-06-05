@@ -98,6 +98,15 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Recognize Any Operator }
+
+function IsOp(c : char) : boolean;
+begin
+   IsOp := c in ['+', '-', '*', '/', '<', '>', ':', '='];
+end;
+
+
+{--------------------------------------------------------------}
 { Recognize White Space }
 
 function IsWhite(c : char) : boolean;
@@ -151,6 +160,23 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Get an Operator }
+
+function GetOp : string;
+var x : string[16];
+begin
+   x := '';
+   if not IsOp(Look) then Expected('Operator');
+   while IsOp(Look) do begin
+      x := x + Look;
+      GetChar;
+   end;
+   GetOp := x;
+   SkipWhite;
+end;
+
+
+{--------------------------------------------------------------}
 { Skip a CRLF }
 
 procedure Fin;
@@ -171,6 +197,8 @@ begin
       Scan := GetName
    else if IsDigit(Look) then
       Scan := GetNum
+   else if IsOp(Look) then
+      Scan := GetOp
    else begin
       Scan := Look;
       GetChar;
