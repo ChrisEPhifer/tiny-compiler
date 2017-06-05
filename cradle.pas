@@ -5,7 +5,8 @@ program cradle;
 { Constant Declarations }
 
 const TAB = ^I;
-       CR = ^J;
+       CR = ^M;
+       LF = ^J;
 
 {--------------------------------------------------------------}
    { Variable Declarations }
@@ -53,8 +54,20 @@ end;
 
 procedure Match(x : char);
 begin
-   if Look = x then GetChar
-   else Expected('''' + x + '''');
+   if Look <> x then Expected('''' + x + '''');
+   GetChar;
+   SkipWhite;
+end;
+
+
+{--------------------------------------------------------------}
+{ Skip a CRLF }
+
+procedure Fin;
+begin
+   if Look = CR then GetChar;
+   if Look = LF then GetChar;
+   SkipWhite;
 end;
 
 
@@ -92,6 +105,14 @@ end;
 function IsAddop(c : char) : boolean;
 begin
    IsAddop := c in ['+', '-'];
+end;
+
+
+{--------------------------------------------------------------}
+{ Recognize a Mulop }
+function IsMulop(c : char) : boolean;
+begin
+   IsMulop := c in ['*', '/'];
 end;
 
 
