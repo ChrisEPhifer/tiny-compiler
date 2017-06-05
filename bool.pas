@@ -225,7 +225,7 @@ procedure Expression; Forward;
       else if IsAlpha(Look) then
          Ident
       else
-         EmitLn('Move #' + GetNum + ',D0');
+         EmitLn('MOVE #' + GetNum + ',D0');
    end;
 
 
@@ -402,7 +402,7 @@ procedure BoolFactor;
 begin
    if IsBoolean(Look) then
       if GetBoolean then
-         EmitLn('Move #-1,D0')
+         EmitLn('MOVE #-1,D0')
       else
          EmitLn('CLR D0')
       else Relation;

@@ -5,7 +5,8 @@ program control;
 { Constant Declarations }
 
 const TAB = ^I;
-       CR = ^J;
+       CR = ^M;
+       LF = ^J;
 
 {--------------------------------------------------------------}
    { Variable Declarations }
@@ -215,6 +216,16 @@ begin
 end;
 
 
+{--------------------------------------------------------------}
+{ Skip a CRLF }
+
+procedure Fin;
+begin
+   if Look = CR then GetChar;
+   if Look = LF then GetChar;
+end;
+
+
 {------------------------------------------------------------------------------}
 { Parse and Translate an Identifier }
 
@@ -247,7 +258,7 @@ procedure Expression; Forward;
       else if IsAlpha(Look) then
          Ident
       else
-         EmitLn('Move #' + GetNum + ',D0');
+         EmitLn('MOVE #' + GetNum + ',D0');
    end;
 
 
@@ -424,7 +435,7 @@ procedure BoolFactor;
 begin
    if IsBoolean(Look) then
       if GetBoolean then
-         EmitLn('Move #-1,D0')
+         EmitLn('MOVE #-1,D0')
       else
          EmitLn('CLR D0')
       else Relation;
@@ -645,11 +656,16 @@ end;
 
 
 {--------------------------------------------------------------}
-{ Recognize and Translate an "Other" }
+{ Parse and Translate an Assignment Statement }
 
-procedure Other;
+procedure Assignment;
+var Name : char;
 begin
-   EmitLn(GetName);
+   Name := GetName;
+   Match('=');
+   BoolExpression;
+   EmitLn('LEA ' + NAME + '(PC),A0');
+   EmitLn('MOVE D0,(A0)');
 end;
 
 
@@ -659,6 +675,7 @@ end;
 procedure Block(L : string) ;
 begin
    while not(Look in ['e', 'l', 'u']) do begin
+      Fin;
       case Look of
         'i' : DoIf(L);
         'w' : DoWhile;
@@ -667,8 +684,9 @@ begin
         'f' : DoFor;
         'd' : DoDo;
         'b' : DoBreak(L);
-      else Other;
+      else Assignment;
       end;
+      Fin;
    end;
 end;
 
