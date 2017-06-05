@@ -1,6 +1,43 @@
 {--------------------------------------------------------------}
 program scanner;
 
+
+{--------------------------------------------------------------}
+{ Type Declarations }
+
+type Symbol = string[8];
+     SymTab = array[1..1000] of Symbol;
+     TabPtr = ^SymTab;
+    SymType = (IfSym, ElseSym, EndifSym, EndSym, Ident, Number, Op);
+
+
+{--------------------------------------------------------------}
+{ Definition of Keywords and Token Types }
+
+const KWlist : array [1..4] of Symbol = ('IF', 'ELSE', 'ENDIF', 'END');
+
+
+{--------------------------------------------------------------}
+{ Table Lookup }
+
+{ If the input string matches a table entry, return the entry
+  index. If not, return a zero. }
+
+function Lookup(T : TabPtr; s : string; n : integer) : integer;
+var i     : integer;
+    found : boolean;
+begin
+   found := false;
+   i := n;
+   while (i > 0) and not found do
+      if s = T^[i] then
+         found := true
+      else
+         dec(i);
+   Lookup := i;
+end;
+
+
 {--------------------------------------------------------------}
 { Constant Declarations }
 
@@ -8,11 +45,14 @@ const TAB = ^I;
        CR = ^M;
        LF = ^J;
 
+
 {--------------------------------------------------------------}
    { Variable Declarations }
 
 var Look : char;       { Lookahead Character }
-   Token : string[16]; { Lexical Token }
+   Token : Symtype;    { Lexical Token }
+   Value : string[16]; { Value of Token }
+
 
 {--------------------------------------------------------------}
    { Read New Character From Input Stream }
@@ -21,6 +61,7 @@ procedure GetChar;
 begin
    Read(Look);
 end;
+
 
 {--------------------------------------------------------------}
 { Report an Error }
@@ -141,51 +182,50 @@ end;
 {--------------------------------------------------------------}
 { Get an Identifier }
 
-function GetName : string;
-var x : string[8];
+procedure GetName;
+var k : integer;
 begin
-   x := '';
+   Value := '';
    if not IsAlpha(Look) then Expected('Name');
    while IsAlNum(Look) do begin
-      x := x + UpCase(Look);
+      Value := Value + UpCase(Look);
       GetChar;
    end;
-   GetName := x;
-   SkipWhite;
+   k := Lookup(Addr(KWlist), Value, 4);
+   if k = 0 then
+      Token := Ident
+   else
+      Token := SymType(k-1);
 end;
 
 
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum : string;
-var x : string[16];
+procedure GetNum;
 begin
-   x := '';
+   Value := '';
    if not IsDigit(Look) then Expected('Integer');
    while IsDigit(Look) do begin
-      x := x + Look;
+      Value := Value + Look;
       GetChar;
    end;
-   GetNum := x;
-   SkipWhite;
+   Token := Number
 end;
 
 
 {--------------------------------------------------------------}
 { Get an Operator }
 
-function GetOp : string;
-var x : string[16];
+procedure GetOp;
 begin
-   x := '';
+   Value := '';
    if not IsOp(Look) then Expected('Operator');
    while IsOp(Look) do begin
-      x := x + Look;
+      Value := Value + Look;
       GetChar;
    end;
-   GetOp := x;
-   SkipWhite;
+   Token := Op;
 end;
 
 
@@ -202,18 +242,20 @@ end;
 {--------------------------------------------------------------}
 { Lexical Scanner }
 
-function Scan : string;
+procedure Scan;
+var k : integer;
 begin
    while Look = LF do
       Fin;
    if IsAlpha(Look) then
-      Scan := GetName
+      GetName
    else if IsDigit(Look) then
-      Scan := GetNum
+      GetNum
    else if IsOp(Look) then
-      Scan := GetOp
+      GetOp
    else begin
-      Scan := Look;
+      Value := Look;
+      Token := Op;
       GetChar;
    end;
    SkipWhite;
@@ -254,9 +296,14 @@ end;
 begin
    Init;
    repeat
-      Token := Scan;
-      writeln(Token);
-      if Token = LF then Fin;
-   until Token = '.';
+      Scan;
+      case Token of
+        Ident                            : Write('Ident ');
+        Number                           : Write('Number ');
+        Op                               : Write('Operator ');
+        IfSym, ElseSym, EndifSym, EndSym : Write('Keyword ');
+      end;
+      Writeln(Value);
+   until Token = EndSym;
 end.
 {--------------------------------------------------------------}
