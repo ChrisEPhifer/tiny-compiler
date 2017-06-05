@@ -126,6 +126,19 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Skip Over a Comma }
+
+procedure SkipComma;
+begin
+   SkipWhite;
+   if Look = ',' then begin
+      GetChar;
+      SkipWhite;
+   end;
+end;
+
+
+{--------------------------------------------------------------}
 { Get an Identifier }
 
 function GetName : string;
