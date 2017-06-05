@@ -172,11 +172,16 @@ end;
 {--------------------------------------------------------------}
 { Get a Number }
 
-function GetNum : char;
+function GetNum : integer;
+var Val : integer;
 begin
+   Val := 0;
    if not IsDigit(Look) then Expected('Integer');
-   GetNum := Look;
-   GetChar;
+   while IsDigit(Look) do begin
+      Val := 10 * Val + Ord(Look) - Ord('0');
+      GetChar;
+   end;
+   GetNum := Val;
 end;
 
 
@@ -244,7 +249,17 @@ end;
 
 procedure Alloc(N : char);
 begin
-   WriteLn(N, ':', TAB, 'DC 0');
+   Write(N, ':', TAB, 'DC ');
+   if Look = '=' then begin
+      Match('=');
+      if Look = '-' then begin
+         Write(Look);
+         Match('-');
+      end;
+      WriteLn(GetNum);
+      end
+   else
+      WriteLn('0');
 end;
 
 
@@ -256,6 +271,10 @@ var Name : char;
 begin
    Match('v');
    Alloc(GetName);
+   while Look  = ',' do begin
+      GetChar;
+      Alloc(GetName);
+   end;
 end;
 
 
