@@ -1,5 +1,5 @@
 {--------------------------------------------------------------}
-program cradle;
+program TINY;
 
 {--------------------------------------------------------------}
 { Constant Declarations }
@@ -11,7 +11,8 @@ const TAB = ^I;
 {--------------------------------------------------------------}
    { Variable Declarations }
 
-var Look: char;       { Lookahead Character }
+var Look   : char;       { Lookahead Character }
+    LCount : integer;    { Label Counter }
 
 {--------------------------------------------------------------}
    { Read New Character From Input Stream }
@@ -136,6 +137,27 @@ begin
 end;
 
 
+{------------------------------------------------------------------------------}
+{ Generate a Unique Label }
+
+function NewLabel : string;
+var S : string;
+begin
+   Str(LCount, S);
+   NewLabel := 'L' + S;
+   Inc(LCount);
+end;
+
+
+{------------------------------------------------------------------------------}
+{ Post a Label To Output }
+
+procedure PostLabel(L : string);
+begin
+   WriteLn(L, ':');
+end;
+
+
 {--------------------------------------------------------------}
 { Get an Identifier }
 
@@ -178,6 +200,47 @@ end;
 
 
 {--------------------------------------------------------------}
+{ Write Header Info }
+
+procedure Header;
+begin
+   WriteLn('WARMST', TAB, 'EQU $A01E');
+end;
+
+
+{--------------------------------------------------------------}
+{ Write the Prolog }
+
+procedure Prolog;
+begin
+   PostLabel('MAIN');
+end;
+
+
+{--------------------------------------------------------------}
+{ Write the Epilog }
+
+procedure Epilog;
+begin
+   EmitLn('DC WARMST');
+   EmitLn('END MAIN');
+end;
+
+
+{--------------------------------------------------------------}
+{ Parse and Translate a Program }
+
+procedure Prog;
+begin
+   Match('p');
+   Header;
+   Prolog;
+   Match('.');
+   Epilog;
+end;
+
+
+{--------------------------------------------------------------}
 { Initialize }
 
 procedure Init;
@@ -191,5 +254,7 @@ end;
 
 begin
    Init;
+   Prog;
+   if Look <> LF then Abort('Unexpected data after ''.''');
 end.
 {--------------------------------------------------------------}
