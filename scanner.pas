@@ -8,13 +8,13 @@ program scanner;
 type Symbol = string[8];
      SymTab = array[1..1000] of Symbol;
      TabPtr = ^SymTab;
-    SymType = (IfSym, ElseSym, EndifSym, EndSym, Ident, Number, Op);
 
 
 {--------------------------------------------------------------}
 { Definition of Keywords and Token Types }
 
 const KWlist : array [1..4] of Symbol = ('IF', 'ELSE', 'ENDIF', 'END');
+      KWcode : string[5]              = 'xilee';
 
 
 {--------------------------------------------------------------}
@@ -50,7 +50,7 @@ const TAB = ^I;
    { Variable Declarations }
 
 var Look : char;       { Lookahead Character }
-   Token : Symtype;    { Lexical Token }
+   Token : char;    { Lexical Token }
    Value : string[16]; { Value of Token }
 
 
@@ -183,7 +183,6 @@ end;
 { Get an Identifier }
 
 procedure GetName;
-var k : integer;
 begin
    Value := '';
    if not IsAlpha(Look) then Expected('Name');
@@ -191,11 +190,7 @@ begin
       Value := Value + UpCase(Look);
       GetChar;
    end;
-   k := Lookup(Addr(KWlist), Value, 4);
-   if k = 0 then
-      Token := Ident
-   else
-      Token := SymType(k-1);
+   Token := KWcode[Lookup(Addr(KWlist), Value, 4) + 1];
 end;
 
 
@@ -210,7 +205,7 @@ begin
       Value := Value + Look;
       GetChar;
    end;
-   Token := Number
+   Token := '#';
 end;
 
 
@@ -225,7 +220,10 @@ begin
       Value := Value + Look;
       GetChar;
    end;
-   Token := Op;
+   if Length(Value) = 1 then
+      Token := Value[1]
+   else
+      Token := '?';
 end;
 
 
@@ -255,7 +253,7 @@ begin
       GetOp
    else begin
       Value := Look;
-      Token := Op;
+      Token := '?';
       GetChar;
    end;
    SkipWhite;
@@ -298,12 +296,12 @@ begin
    repeat
       Scan;
       case Token of
-        Ident                            : Write('Ident ');
-        Number                           : Write('Number ');
-        Op                               : Write('Operator ');
-        IfSym, ElseSym, EndifSym, EndSym : Write('Keyword ');
+        'x'           : Write('Ident ');
+        '#'           : Write('Number ');
+        'i', 'l', 'e' : Write('Keyword ');
+      else Write('Operator ');
       end;
       Writeln(Value);
-   until Token = EndSym;
+   until Value = 'END';
 end.
 {--------------------------------------------------------------}
